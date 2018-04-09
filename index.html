@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>动态详情</title>
+</head>
+
+<script src="js/jquery-1.8.min.js"></script>
+<style>
+    .video{
+        overflow: hidden;
+        position: relative;
+    }
+    .bad-video {
+        overflow: hidden;
+        background-color: #000;
+    }
+    .bad-video video {
+        width: auto;
+        display: block;
+        object-fit:fill;
+        margin: 0 auto;
+        max-height: 300px;
+    }
+    .video-control{
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(0,0,0,0);
+    }
+    .video-control .vplay{
+        position: absolute;
+        width: 15%;
+        z-index: 99;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+    .video-control .controls {
+        width: 100%;
+        height: 0.5rem;
+        line-height: 0.5rem;
+        font-size: 0.2048rem;
+        color: white;
+        display: block;
+        position: absolute;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, .55);
+        display: -webkit-flex;
+        display: flex;
+    }
+
+    .video-control .controls>* {
+        flex: 1;
+    }
+
+    .video-control .controls>*:nth-child(1) {
+        flex: 1;
+        text-align: center;
+    }
+
+    .video-control .controls>*:nth-child(2) {
+        flex: 3;
+    }
+    .video-control .controls>*:nth-child(3) {
+        flex: 1;
+        text-align: center;
+    }
+    .video-control .controls>*:nth-child(4) {
+        flex: 1;
+        line-height: 0.5rem;
+    }
+    .video-control .controls>*:nth-child(4)>img{
+        display: block;
+        margin:   0 auto;
+        padding-top: 0.15rem;
+        width: 0.3rem;
+    }
+    .video-control .controls>*:nth-child(5){
+        flex: 2;
+        line-height: 0.5rem;
+    }
+    .video-control .controls>*:nth-child(6) {
+        flex: 1;
+        line-height: 0.5rem;
+    }
+    .video-control .controls>*:nth-child(6)>img {
+        display: block;
+        margin:   0 auto;
+        padding-top: 0.15rem;
+        width: 0.3rem;
+    }
+    .video-control .controls .progressBar,.video-control .controls .volumeBar {
+        margin: .22rem 5%;
+        position: relative;
+        width: 90%;
+        height: .06rem;
+        background-color: rgba(200, 200, 200, .55);
+        border-radius: 10px;
+    }
+
+    .video-control .controls .timeBar,.video-control .controls .v-Bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background-color: rgba(255, 153, 116, .85);
+        border-radius: 10px;
+    }
+    .video-control .controls .circle ,.video-control .controls .v-circle{
+        position: absolute;
+        top: -0.05rem;
+        left: 0;
+        background-color: #FF9974;
+        width: .16rem;
+        height: .16rem;
+        border-radius: 50%;
+        z-index: 1000;
+    }
+
+    @keyframes vhide {0% {opacity: 1;}100% {opacity: 1;}}
+
+    @-webkit-keyframes vhide {0% {opacity: 1;}100% {opacity: 1;}}
+
+    .vhidden {
+        animation: vhide 3.5s ease-in;
+        -webkit-animation: vhide 3.5s ease-in;
+        animation-fill-mode:forwards;
+        -webkit-animation-fill-mode: forwards;
+    }
+</style>
+<body>
+    
+
+            <div class="video">
+                <div class="bad-video">
+                    <video class=""  webkit-playsinline x5-video-player-type="h5">
+                        <source src='' type="video/mp4"></source>
+                        <p>设备不支持</p>
+                    </video>
+                </div>
+                <div class="video-control"></div>
+            </div>
+
+     
+
+       
+</body>
+<script>
+  
+   
+      //		不考虑设备dpr的rem布局
+    (function (doc, win) {
+        var docEl = doc.documentElement,
+            resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+            recalc = function () {
+                var clientWidth = docEl.clientWidth;
+                if (!clientWidth) return;
+                if(clientWidth>=640){
+                    docEl.style.fontSize = '100px';
+                }else{
+                    docEl.style.fontSize = 100 * (clientWidth / 640) + 'px';
+                }
+            };
+
+        if (!doc.addEventListener) return;
+        win.addEventListener(resizeEvt, recalc, false);
+        doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);                 
+
+                 
+
+	///////////////////视频//////////////////////
+
+
+      var bvd = function(dom) {
+
+          //记录信息
+          bvd.prototype.initInfo = function() {
+              var that=this;
+
+              //在onload状态下，offsetHeight才会获取到正确的值，但是没有用
+              //window.onload = function(){
+                  var info = [
+                          document.documentElement.clientWidth || document.body.clientWidth,
+                          document.documentElement.clientHeight || document.body.clientHeigth
+                  ],
+                  w = info[0],
+                  h = info[1],
+                  cha = Math.abs(h - w) / 2;
+
+                  that.maxInfo = {//max状态时的样式 bad-video样式
+                      width: h + 'px',
+                      height: w + 'px',
+                      zIndex:'10',
+                      left:0,
+                      top:0,
+                      position: 'fixed',
+                      transform: 'translate(-' + cha + 'px,' + cha + 'px) rotate(90deg)'
+                  }
+
+                  that.maxInfo2={//max状态时的样式 video-control样式
+                      width: h + 'px',
+                      height: w + 'px',
+                      zIndex:'10',
+                      left:0,
+                      top:0,
+                      position: 'fixed',
+                      transform: 'translate(-' + cha + 'px,' + cha + 'px) rotate(90deg)'
+                  }
+                  that.maxInfo3={//max状态时的样式 video样式
+                      maxHeight:w + 'px',
+                  }
+
+                  var timer = setInterval(function() {
+                      if (that.video.offsetHeight) {
+                          that.miniInfo = {//mini状态时的样式,因为加载原因，放在setInterval里 bad-video样式
+                              width: '100%',//that.video.offsetWidth + 'px'
+                              height: '100%',//that.video.offsetHeight + 'px'
+                              position: that.vRoom.style.position,
+                              transform: 'translate(0,0) rotate(0deg)'
+                          }
+                          that.miniInfo2 = {//mini状态时 video-control样式
+                              width: '100%',//that.video.offsetWidth + 'px'
+                              height: '100%',//that.video.offsetHeight + 'px'
+                              position:'absolute',
+                              transform: 'translate(0,0) rotate(0deg)'
+                          }
+                          that.miniInfo3={
+                              maxHeight:'300px',
+                          }
+                          clearInterval(timer)
+                      }
+                  }, 50)
+              //}
+          }
+          //全屏 mini 两种模式切换
+          bvd.prototype.switch = function() {
+              var vR = this.vRoom;
+              var videoControl=this.videoControl;
+              var video=this.video;
+              //获取需要转换的样式信息
+              var info = this.isMax ? this.miniInfo : this.maxInfo;
+              var info2 = this.isMax ? this.miniInfo2 : this.maxInfo2;
+              var info3=this.isMax ? this.miniInfo3 : this.maxInfo3;
+              for(var i in info) {
+                  vR.style[i] = info[i];
+              }
+              for(var j in info2) {
+                  videoControl.style[j] = info2[j];
+              }
+              for(var k in info3) {
+                  video.style[k] = info3[k];
+              }
+              this.isMax = !this.isMax;
+              if(this.isMax){//如果是大屏的话，把全屏图片切换为收缩图片
+                  this.vA.querySelector('.fill').src='./img/no-screen.png';
+              }else{
+                  this.vA.querySelector('.fill').src='./img/screen.png';
+              }
+
+          }
+          //初始状态
+          bvd.prototype.initEm = function(){
+              this.video=document.querySelector('video');
+              this.vRoom=document.querySelector('.bad-video');
+
+              this.videoControl=document.querySelector('.video-control');
+
+              this.vimg = document.createElement("img");
+              this.vimg.src ='img/play.png'
+              this.vimg.className = 'vplay';
+              this.videoControl.appendChild(this.vimg);
+
+              //添加控制区域
+              this.vC = document.createElement("div");
+              this.vC.classList.add('controls');
+              this.videoControl.appendChild(this.vC);
+
+
+              //起始时间
+              this.vt1 = document.createElement("div");
+              this.vt1.classList.add('current');
+              this.vt1.innerHTML = '00:00';
+              this.vC.appendChild(this.vt1);
+              //添加控制条
+              this.vp = document.createElement("div");
+              this.vp.innerHTML = "<div class='progressBar'><div class='timeBar'></div><div class='circle'></div></div>";
+              this.vC.appendChild(this.vp);
+              //总时间
+              this.vt2 = document.createElement("div");
+              this.vt2.classList.add('duration');
+              this.vt2.innerHTML = '00:00';
+              this.vC.appendChild(this.vt2);
+
+              //音量
+              this.vV = document.createElement("div");
+              this.vV.innerHTML = '<img class="volume" src="img/volume.png"/> ';
+              this.vC.appendChild(this.vV);
+
+              //添加音量控制条
+              this.vVp = document.createElement("div");
+              this.vVp.innerHTML = "<div class='volumeBar'><div class='v-Bar'></div><div class='v-circle'></div></div>";
+              this.vC.appendChild(this.vVp);
+
+              //全屏
+              this.vA = document.createElement("div");
+              this.vA.innerHTML = '<img class="fill" src=" ./img/screen.png">';
+              this.vC.appendChild(this.vA);
+          }
+
+          //回聘事件
+          bvd.prototype.initEvent = function(){
+              var that = this;
+
+              //视频点击暂停或播放事件
+              this.videoControl.addEventListener('click',function(e){
+                  if(e.target==that.videoControl){
+                      if(that.video.paused || that.video.ended) {
+                          //暂停时点击就播放
+                          if(that.video.ended) {//如果播放完毕，就重头开始播放
+                              that.video.currentTime = 0;
+                          }
+                          that.video.play();
+                      } else {
+                          //播放时点击就暂停
+                          that.video.pause();
+                      }
+                  }
+                  //给播放按钮图片添加事件
+                  if(e.target==that.vimg){
+                      that.vimg.style.display = 'none';
+                      that.video.play();
+                  }
+
+              })
+
+              //视频播放事件
+              this.video.addEventListener('play',function(){
+                  that.vimg.style.display = 'none';
+                  that.vC.classList.add('vhidden');
+                  that.vCt = setTimeout(function(){
+                      that.vC.style.visibility = 'hidden';
+                  },3400);
+              })
+
+
+              //获取到元数据
+              this.video.addEventListener('loadedmetadata',function(){
+                  //进程
+                  that.vDuration = this.duration;
+                  that.vC.querySelector('.duration').innerHTML = stom(that.vDuration);
+                  //音量
+                  that.vV.querySelector('.volume').src=that.video.muted?"./img/mute.png":"./img/volume.png";
+                  that.vVp.querySelector('.v-Bar').style.width = this.volume*100 + '%';
+                  that.vVp.querySelector('.v-circle').style.left = this.volume*100-2 + '%';
+              });
+
+              //暂停or停止
+              this.video.addEventListener('pause',function(){
+                  that.vimg.style.display = 'block';
+                  that.vC.classList.remove('vhidden');
+                  that.vC.style.visibility = 'visible';
+                  that.vCt && clearTimeout(that.vCt);
+              });
+
+              //改变进程进度条
+              this.vp.addEventListener('click',function(e){
+                  var tP=e.layerX/that.vC.querySelector('.progressBar').clientWidth;//点击位置占中长的百分比
+                  if(that.video.paused || that.video.ended){
+                      that.video.play();
+                      that.video.currentTime =  that.vDuration*e.layerX/that.vC.querySelector('.progressBar').clientWidth;//改变当前播放时间   that.vDuration*e.layerX/that.vC.querySelector('.progressBar').clientWidth
+
+                      //更新进度条
+                      var percentage = 100 *tP;
+                      that.vC.querySelector('.timeBar').style.width = percentage + '%';
+                      that.vC.querySelector('.circle').style.left = percentage-2 + '%';
+                      //更新当前播放时间
+                      that.vC.querySelector('.current').innerHTML = stom(that.video.currentTime);
+                  }
+                  else{
+                      that.video.currentTime = that.vDuration*e.layerX/that.vC.querySelector('.progressBar').clientWidth;//改变当前播放时间   that.vDuration*e.layerX/that.vC.querySelector('.progressBar').clientWidth
+
+                      //更新进度条
+                      var percentage = 100 *tP;
+                      that.vC.querySelector('.timeBar').style.width = percentage + '%';
+                      that.vC.querySelector('.circle').style.left = percentage-2 + '%';
+                      //更新当前播放时间
+                      that.vC.querySelector('.current').innerHTML = stom(that.video.currentTime);
+                  }
+              })
+
+              //静音切换
+              this.vV.addEventListener('click',function(){
+                  that.video.muted=!that.video.muted;
+                  if(that.video.muted){
+                      that.vV.querySelector('.volume').src="./img/mute.png";
+                      that.vVp.querySelector('.v-Bar').style.width = 0 + '%';
+                      that.vVp.querySelector('.v-circle').style.left = 0+ '%';
+                  }else{
+                      that.vV.querySelector('.volume').src="./img/volume.png";
+                      that.vVp.querySelector('.v-Bar').style.width = that.video.volume*100 + '%';
+                      that.vVp.querySelector('.v-circle').style.left = that.video.volume*100-2 + '%';
+                  }
+
+              });
+
+              //改变音量
+              this.vVp.addEventListener('click',function(e){
+                  var vtP=e.layerX/that.vC.querySelector('.volumeBar').clientWidth;//点击位置占中长的百分比
+                  if(0<=vtP&&vtP<=1){
+                      that.video.volume =vtP //e.layerX/that.vC.querySelector('.volumeBar').clientWidth;//改变当前播放音量
+                      that.video.muted=(that.video.volume==0)?true:false;
+                      that.vV.querySelector('.volume').src=(that.video.volume==0)?"./img/mute.png":"./img/volume.png";
+                      //更新音量条
+                      var percentage = 100 *vtP;
+                      that.vVp.querySelector('.v-Bar').style.width = percentage + '%';
+                      that.vVp.querySelector('.v-circle').style.left = percentage-2 + '%';
+                  }
+
+              })
+
+              //视频播放中事件
+              this.video.addEventListener('timeupdate', function() {
+                  //更新进度条
+                  var percentage = 100 * this.currentTime / that.vDuration;
+                  that.vC.querySelector('.timeBar').style.width = percentage + '%';
+                  that.vC.querySelector('.circle').style.left = percentage-2 + '%';
+                  //更新当前播放时间
+                  that.vC.querySelector('.current').innerHTML = stom(this.currentTime);
+              });
+
+              //全屏按钮
+              this.vC.querySelector('.fill').addEventListener('click', function() {
+                  that.switch();
+              });
+          }
+
+      }
+
+      //时间转化函数
+      function stom(t) {
+          var m = Math.floor(t / 60);
+          m < 10 && (m = '0' + m);
+          return m + ":" + (t % 60 / 100).toFixed(2).slice(-2);
+      }
+      
+      
+          $('video').attr('src','http://nettuts.s3.amazonaws.com/763_sammyJSIntro/trailer_test.mp4');
+                          
+                       
+//                      if($('body').width()>v_width){
+//                          $('video').css('width','auto');
+//                      }else{
+//                          $('video').css('width','100%');
+//                      }
+
+                              var pe=new bvd();
+
+                              //元素初始化
+                              pe.initEm();
+                              //事件初始化
+                              pe.initEvent();
+                              //记录信息
+                              pe.initInfo();
+                              //当前播放模式 false 为 mini播放
+                              pe.isMax = false;
+
+</script>
+</html>
