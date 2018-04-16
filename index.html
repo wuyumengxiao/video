@@ -187,23 +187,18 @@
     })(document, window);                 
 
 	
-	
 	$(function(){
         var isIphone = navigator.userAgent.indexOf('iPhone') >= 0;
         
         if (isIphone) {
             $(".button").click(function(){
+            	alert(11111);
                 window.location="http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4"
             });
         }
-        else {
-            $(".button").click(function(){              
-            	var video = document.getElementById("video");
-                video.play();
-            }); 
-        }
+        
     });
-                 
+               
 
 	///////////////////视频//////////////////////
 
