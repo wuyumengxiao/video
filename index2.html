@@ -143,7 +143,7 @@
             <div class="video">
                 <div class="bad-video">
                 	<!--controls="controls" style="object-fit:fill" x-webkit-airplay="allow" x5-video-player-type="h5"　 x5-video-player-fullscreen="true"　x5-video-orientation="portraint"　--> 
-                    <video src='http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4'  id="video" class="" controls="controls"   preload="auto"  webkit-playsinline="true"　playsinline="true" autoplay="autoplay">
+                    <video src='http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4'  id="video" class=""   preload="auto"  webkit-playsinline="true"　playsinline="true" autoplay="autoplay">
   <!--preload="auto"
  x-webkit-airplay="allow"
  x5-video-player-type="h5"　启用H5播放器,是wechat安卓版特性
@@ -156,10 +156,9 @@
                         <p>设备不支持</p>
                     </video>
                 </div>
-                <!--<div class="video-control"></div>-->
+                <div class="video-control"></div>
             </div>
-            <div class='button' style="width: 40px;height: 40px;background:red;"></div>
-            <a href='https://wuyumengxiao.github.io/video/index2.html' style="display: block;width: 40px;height: 40px;background:blue;"></a>
+           
  
      
 
@@ -478,11 +477,7 @@
           return m + ":" + (t % 60 / 100).toFixed(2).slice(-2);
       }
       
-//    var t=setTimeout(function(){
-//    	$('video').attr('src','http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4');
-//    	alert(111);
-//    	alert($('video').attr('src'));
-//    },3000)
+
         
                           
                        
@@ -492,16 +487,15 @@
 //                          $('video').css('width','100%');
 //                      }
 
-//                            var pe=new bvd();
-//
-//                            //元素初始化
-//                            pe.initEm();
-//                            //事件初始化
-//                            pe.initEvent();
-//                            //记录信息
-//                            pe.initInfo();
-//                            //当前播放模式 false 为 mini播放
-//                            pe.isMax = false;
+      var pe=new bvd();
+      //元素初始化
+      pe.initEm();
+      //事件初始化
+      pe.initEvent();
+      //记录信息
+      pe.initInfo();
+      //当前播放模式 false 为 mini播放
+      pe.isMax = false;
 
 </script>
 </html>
