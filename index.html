@@ -143,7 +143,7 @@
             <div class="video">
                 <div class="bad-video">
                 	<!--controls="controls" style="object-fit:fill" x-webkit-airplay="allow" x5-video-player-type="h5"　 x5-video-player-fullscreen="true"　x5-video-orientation="portraint"　--> 
-                    <!--<video src='http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4'  id="video" class="" controls="controls"   preload="auto"  webkit-playsinline="true"　playsinline="true" autoplay="autoplay">-->
+                    <video src='http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4'  id="video" class="" controls="controls"   preload="auto"  webkit-playsinline="true"　playsinline="true" autoplay="autoplay">
   <!--preload="auto"
  x-webkit-airplay="allow"
  x5-video-player-type="h5"　启用H5播放器,是wechat安卓版特性
@@ -187,21 +187,18 @@
     })(document, window);                 
 
 	
-//	$(function(){
-//      var isIphone = navigator.userAgent.indexOf('iPhone') >= 0;
-//      
-//      if (isIphone) {
-//          $(".button").click(function(){
-//          	alert(11111);
-//              window.location="http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4"
-//          });
-//      }
-//      
-//  });
-			$(".button").click(function(){
+	$(function(){
+        var isIphone = navigator.userAgent.indexOf('iPhone') >= 0;
+        
+        if (isIphone) {
+            $(".button").click(function(){
             	alert(11111);
                 window.location="http://ydapi.test.ve-link.com/files/3/f/04/4bd06fbe7f688681d9f83faa178153471e9f04f3.mp4"
             });
+        }
+        
+    });
+			
                
 //var isIphone = navigator.userAgent.indexOf('iPhone') >= 0;
 	///////////////////视频//////////////////////
